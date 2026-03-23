@@ -1,0 +1,8 @@
+#ignore files for git
+
+output
+.idea
+dataset
+fire_parquet
+spark-warehouse
+
