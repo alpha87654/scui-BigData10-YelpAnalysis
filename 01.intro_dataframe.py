@@ -9,6 +9,8 @@ spark = (SparkSession.builder
 data = [("tom", 2), ("jerry", 1)]
 df = spark.createDataFrame(data, ["name", "age"])
 
+print("spark is working")
+
 df.printSchema()
 df.show()
 spark.stop()
