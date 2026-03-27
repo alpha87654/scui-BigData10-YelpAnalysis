@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.env
+.venv/
+.idea/
+01.intro_dataframe.py
+check_file.py
+creating_dataframe.py
+fire_call_exercise.py
+hello.py
+.dataset/
+.fire_calls_parquest/
