@@ -202,6 +202,17 @@ def generate_sql(
     history: Optional[List[Dict]] = None,
     error: Optional[str] = None
 ) -> str:
+
+    # ── Guard: reject non-data questions ──
+    non_data_keywords = [
+        "how are you", "what are you", "who are you",
+        "can you change", "hello", "hi", "hey",
+        "how long it takes", "what is your name",
+        "thank you", "thanks", "good morning", "good night"
+    ]
+    if any(k in question.lower() for k in non_data_keywords):
+        return "SELECT 'Please ask a Yelp data question! e.g. Top 10 cities with most businesses' AS message"
+
     mock_sql_map = {
         "mexican": """
 SELECT name, city, stars, review_count
