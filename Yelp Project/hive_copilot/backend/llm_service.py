@@ -183,14 +183,14 @@ def call_deepseek(messages: List[Dict[str, str]]) -> str:
         "model": DEEPSEEK_MODEL,
         "messages": messages,
         "temperature": 0,
-        "max_tokens": 600
+        "max_tokens": 1000
     }
 
     response = requests.post(
         DEEPSEEK_URL,
         headers=headers,
         json=payload,
-        timeout=60
+        timeout=300
     )
     response.raise_for_status()
 
