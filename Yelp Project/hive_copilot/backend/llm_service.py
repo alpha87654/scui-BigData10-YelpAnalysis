@@ -3,48 +3,59 @@ import re
 import requests
 from typing import Optional, List, Dict
 
-DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
-DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
+DEEPSEEK_API_KEY = "sk-8d12c866e35b48b0920277923a961ff9"
+DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
 DEEPSEEK_MODEL = "deepseek-chat"
 
 SCHEMA_CONTEXT = """
-Current database: yelp
+Current database: default
 
 Confirmed tables:
 
 TABLE: business
   business_id   STRING
   name          STRING
-  address       STRING
   city          STRING
   state         STRING
-  postal_code   STRING
-  latitude      FLOAT
-  longitude     FLOAT
   stars         FLOAT
   review_count  INT
   is_open       TINYINT
-  attributes    STRING
   categories    STRING
-  hours         STRING
 
-TABLE: json_business
-  json_body     STRING
+TABLE: review
+  review_id       STRING
+  rev_business_id STRING
+  rev_user_id     STRING
+  rev_stars       INT
+  rev_text        STRING
+  rev_date        DATE
+  rev_useful      INT
+  rev_funny       INT
+  rev_cool        INT
 
-Sample category values:
-  Restaurants, Food, Nightlife, Bars, Mexican, Chinese, American,
-  Pizza, Coffee & Tea, Japanese, Italian, Fast Food
+TABLE: users
+  user_id             STRING
+  user_name           STRING
+  user_review_count   INT
+  user_fans           INT
+  user_elite          STRING
+  user_average_stars  FLOAT
+  user_yelping_since  STRING
+
+TABLE: checkin
+  business_id    STRING
+  checkin_dates  STRING
 
 SQL rules:
-- Generate Spark SQL / Hive-compatible SQL only.
-- Use only confirmed tables and columns from this schema.
-- Do not invent columns like restaurant_name; use name.
-- For cuisine filtering, use LOWER(categories) LIKE '%mexican%'.
-- For city filtering, use LOWER(city) = 'philadelphia' when appropriate.
-- is_open = 1 means open, is_open = 0 means closed.
-- review_count belongs to business.
-- stars belongs to business.
+- Use only these exact table and column names above.
+- For categories use: LOWER(categories) LIKE '%mexican%'
+- For reviews table join: review.rev_business_id = business.business_id
+- Always add LIMIT 50 unless user specifies
+- Return only SELECT statements
 """
+```
+
+---
 
 SYSTEM_PROMPT = f"""
 You are an expert Text-to-SQL assistant for a Yelp analytics project.

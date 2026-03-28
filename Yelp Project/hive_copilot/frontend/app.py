@@ -42,7 +42,7 @@ import base64
 from pathlib import Path
 
 # ── Point to Rahat's backend ──
-BACKEND_URL = "http://node-master:8000"
+BACKEND_URL = "http://localhost:8000"
 
 def set_bg_from_local(image_name: str):
     img_path = Path(__file__).parent / image_name
@@ -87,7 +87,7 @@ st.markdown("""
     border-radius: 18px 18px 4px 18px;
     margin: 8px 0;
     margin-left: 20%;
-    color: #000;
+    color: #FFFFFF;
     font-size: 15px;
 }
 .bot-bubble {
@@ -96,7 +96,7 @@ st.markdown("""
     border-radius: 18px 18px 18px 4px;
     margin: 8px 0;
     margin-right: 20%;
-    color: #000;
+    color: #FFFFFF;
     font-size: 15px;
 }
 .sql-block {
@@ -117,6 +117,7 @@ st.markdown("""
     background: rgba(255, 255, 255, 0.08) !important;
     border: 1px solid rgba(255, 255, 255, 0.14);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    color: #FFFFFF !important;
 }
 
 /* Make the main input look cleaner */
@@ -163,25 +164,65 @@ div[data-testid="stTextInputRootElement"] input {
 }
 
 .credit-badge {
-    position: absolute;
-    top: 120px;
-    right: 80px;
-    padding: 14px 20px;
-    border-radius: 18px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    color: rgba(255,255,255,0.88);
-    font-size: 15px;
+    position: fixed;
+    top: 88px;
+    right: 72px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 13px;
     font-weight: 500;
-    letter-spacing: 0.4px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.28);
+    letter-spacing: 0.5px;
+    z-index: 9999;
+    pointer-events: none;
 }
 
 .credit-badge span {
-    color: #ff5a5f;
+    color: rgba(255, 90, 95, 0.92);
     font-weight: 700;
+}
+.thinking-bubble {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: white !important;
+    font-size: 15px;
+    margin-right: 20%;
+}
+
+.dot-anim {
+    display: inline-flex;
+    align-items: center;
+}
+
+.dot-anim span {
+    display: inline-block;
+    margin-left: 2px;
+    animation: thinkingDots 1.4s infinite;
+    opacity: 0.25;
+}
+
+.dot-anim span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.dot-anim span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes thinkingDots {
+    0%, 80%, 100% {
+        opacity: 0.25;
+        transform: translateY(0);
+    }
+    40% {
+        opacity: 1;
+        transform: translateY(-2px);
+    }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -249,6 +290,11 @@ st.markdown("""
 <div class="hero-title">🧞 Yelp Genie</div>
 <div class="hero-subtitle">Ask your Yelp data wishes, we'll do the magic✨</div>
 """, unsafe_allow_html=True)
+
+st.markdown(
+    '<div class="credit-badge">Brought to you by <span>SCUIB10</span></div>',
+    unsafe_allow_html=True
+)
 
 # ── Sidebar ──
 with st.sidebar:
@@ -349,30 +395,52 @@ if send and user_input.strip():
     question = user_input.strip()
     st.session_state.messages.append({"role": "user", "content": question})
 
-    with st.spinner("Analyzing Yelp data..."):
-        result = call_backend(question, st.session_state.history)
+    thinking_placeholder = st.empty()
+    thinking_placeholder.markdown(
+        """
+        <div class="bot-bubble thinking-bubble">
+            🍜 Yelp Genie is thinking
+            <span class="dot-anim"><span>.</span><span>.</span><span>.</span></span>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
-    if result["status"] in ("success", "corrected"):
-        df       = pd.DataFrame(result["results"])
-        sql      = result["sql"]
-        rows     = result["row_count"]
-        note     = " *(auto-corrected)*" if result["status"] == "corrected" else ""
-        response = f"Found **{rows}** results{note}"
+    try:
+        with st.spinner("Analyzing Yelp data..."):
+            result = call_backend(question, st.session_state.history)
 
-        st.session_state.last_df = df
-        st.session_state.history.append({"question": question, "sql": sql})
+        thinking_placeholder.empty()
+
+        if result["status"] in ("success", "corrected"):
+            df       = pd.DataFrame(result["results"])
+            sql      = result["sql"]
+            rows     = result["row_count"]
+            note     = " *(auto-corrected)*" if result["status"] == "corrected" else ""
+            response = f"Found **{rows}** results{note}"
+
+            st.session_state.last_df = df
+            st.session_state.history.append({"question": question, "sql": sql})
+            st.session_state.messages.append({
+                "role":     "assistant",
+                "content":  response,
+                "sql":      sql,
+                "df":       df,
+                "question": question
+            })
+        else:
+            st.session_state.messages.append({
+                "role":    "assistant",
+                "content": f"Error: {result.get('error', 'Unknown error')}",
+                "sql":     result.get("sql", "")
+            })
+
+    except Exception as e:
+        thinking_placeholder.empty()
         st.session_state.messages.append({
-            "role":     "assistant",
-            "content":  response,
-            "sql":      sql,
-            "df":       df,
-            "question": question
-        })
-    else:
-        st.session_state.messages.append({
-            "role":    "assistant",
-            "content": f"Error: {result.get('error', 'Unknown error')}",
-            "sql":     result.get("sql", "")
+            "role": "assistant",
+            "content": f"Error: {e}",
+            "sql": ""
         })
 
     st.rerun()
