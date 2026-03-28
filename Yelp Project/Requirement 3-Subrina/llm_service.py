@@ -3,7 +3,7 @@ import re
 import requests
 from typing import Optional, List, Dict
 
-DEEPSEEK_API_KEY = "sk-8d12c866e35b48b0920277923a961ff9"
+DEEPSEEK_API_KEY = "My API KEY"
 DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
 DEEPSEEK_MODEL = "deepseek-chat"
 
