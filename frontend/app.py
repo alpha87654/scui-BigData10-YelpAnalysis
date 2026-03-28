@@ -42,7 +42,7 @@ import base64
 from pathlib import Path
 
 # ── Point to Rahat's backend ──
-BACKEND_URL = "http://node-master:8000"
+BACKEND_URL = "http://localhost:8000"
 
 def set_bg_from_local(image_name: str):
     img_path = Path(__file__).parent / image_name
@@ -301,12 +301,12 @@ with st.sidebar:
     st.header("Quick Info")
     st.markdown("""
     **Example questions to try:**
-    - Top 5 Mexican restaurants in Philadelphia
-    - Which city has the most businesses?
-    - Show reviews per year
-    - Top 10 users with most fans
-    - Most popular check-in cities
-    - Rating distribution 1 to 5 stars
+    - Top 10 cities with the most businesses
+    - Top 20 most common restaurant categories
+    - Show rating distribution from 1 to 5 stars
+    - Top 10 highest-rated cities
+    - Most popular cities for check-ins
+    - How many reviews were written each year?
     """)
     st.divider()
 
@@ -378,10 +378,10 @@ with col2:
 st.markdown("**Quick examples:**")
 c1, c2, c3 = st.columns(3)
 examples = [
-    "Top 5 Mexican restaurants in Philadelphia",
-    "Which 10 cities have the most businesses?",
-    "Show rating distribution 1 to 5 stars",
-    "Top 10 users with most reviews",
+    "Top 10 cities with the most businesses",
+    "Top 20 most common restaurant categories",
+    "Show rating distribution from 1 to 5 stars",
+    "Top 10 highest-rated cities",
     "Most popular cities for check-ins",
     "How many reviews were written each year?"
 ]
