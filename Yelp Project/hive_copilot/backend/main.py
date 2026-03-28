@@ -131,7 +131,7 @@ Please fix the SQL and return only the corrected SQL query."""
     payload = {
         "model":       DEEPSEEK_MODEL,
         "messages":    messages,
-        "max_tokens":  500,
+        "max_tokens":  900,
         "temperature": 0.1   # low temp = more deterministic SQL
     }
 
